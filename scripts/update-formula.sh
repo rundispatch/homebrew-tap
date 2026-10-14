@@ -9,7 +9,8 @@ cd "$(dirname "$0")/.."
 version="${1:-$(gh release view -R rundispatch/dispatch --json tagName --jq .tagName)}"
 version="${version#v}"
 current="$(sed -n 's|^ *url ".*/download/v\([^/]*\)/.*|\1|p' Formula/dispatch.rb 2>/dev/null | head -1 || true)"
-if [[ "${version}" == "${current}" ]]; then
+if [[ "${version}" == "${current}" ]]
+then
   echo "Formula/dispatch.rb already installs ${version}."
   exit 0
 fi
@@ -18,7 +19,8 @@ base="https://github.com/rundispatch/dispatch/releases/download/v${version}"
 sums="$(curl -fsSL "${base}/SHA256SUMS")"
 macos="$(printf '%s\n' "${sums}" | awk '$2 == "dispatch-macos-arm64.tar.gz" { print $1 }')"
 linux="$(printf '%s\n' "${sums}" | awk '$2 == "dispatch-linux-x86_64.tar.gz" { print $1 }')"
-if [[ ${#macos} -ne 64 || ${#linux} -ne 64 ]]; then
+if [[ ${#macos} -ne 64 || ${#linux} -ne 64 ]]
+then
   echo "SHA256SUMS for ${version} does not list both archives." >&2
   exit 1
 fi
