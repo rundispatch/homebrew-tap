@@ -1,0 +1,50 @@
+name: Update and test
+
+# Moves the formula to each new Dispatch release, then installs it from this
+# tap on macOS and Linux and runs its test.
+on:
+  schedule:
+    - cron: '41 */3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: scripts/update-formula.sh
+      - name: Commit a new version
+        run: |
+          if git diff --quiet; then exit 0; fi
+          version=$(sed -n 's/^  version "\(.*\)"$/\1/p' Formula/dispatch.rb)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qam "dispatch $version"
+          git push -q origin HEAD:main
+
+  test:
+    needs: update
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install from the tap and test
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"; fi
+          brew tap rundispatch/tap
+          brew install rundispatch/tap/dispatch
+          brew test rundispatch/tap/dispatch
+          dispatch version
