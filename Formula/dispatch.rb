@@ -2,7 +2,6 @@
 class Dispatch < Formula
   desc "Checks whether coding-agent work still holds against the current code"
   homepage "https://rundispatch.sh"
-  version "0.4.13"
   license "MIT"
 
   on_macos do

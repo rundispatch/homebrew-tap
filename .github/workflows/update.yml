@@ -27,7 +27,7 @@ jobs:
       - name: Commit a new version
         run: |
           if git diff --quiet; then exit 0; fi
-          version=$(sed -n 's/^  version "\(.*\)"$/\1/p' Formula/dispatch.rb)
+          version=$(sed -n 's|^ *url ".*/download/v\([^/]*\)/.*|\1|p' Formula/dispatch.rb | head -1)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -qam "dispatch $version"
